@@ -296,3 +296,6 @@ def get_datas():
     driver.quit()
   
     return jsonify(cboe_list)
+
+if __name__ == "__main__": 
+        app.run() 
