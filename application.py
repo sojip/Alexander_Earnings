@@ -14,26 +14,25 @@ from copy_data import copydata
 from datetime import datetime
 import time
 import random
-import pandas as pd
 import json
+import os
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
 
 app = Flask(__name__)
 
-
-
 #initialise webdriver options
+executable_path = os.getenv('GECKODRIVER_PATH')
+firefox_binary = os.getenv('FIREFOX_BIN')
+
 options = Options()
 options.headless = True
-
 
 #global variables
 earning = {}
 earning['ticker'] = []
 earning['date'] = []
 earning['time']= []
-
-
 
 
 @app.route('/')
@@ -43,7 +42,7 @@ def acceuil():
 @app.route('/search', methods=['POST'])
 def search():
     #initialise driver
-    driver = webdriver.Firefox(options = options)
+    driver = webdriver.Firefox(executable_path=executable_path, firefox_binary=firefox_binary, options = options)
     wait = WebDriverWait(driver, 30)
     driver.set_page_load_timeout(60)
     
@@ -160,20 +159,9 @@ def search():
         else:
             driver.quit()
             return("Bad Value Of Dates")
-
-    # #store in excel file
-    # df = pd.DataFrame(earning)
     
     # Create an empty list 
     earnings_list =[] 
-    
-    # # Iterate over each row 
-    # for index, rows in df.iterrows(): 
-    #     # Create list for the current row 
-    #     my_list =[rows.ticker, rows.date, rows.time] 
-        
-    #     # append the list to the final list 
-    #     earnings_list.append(my_list)
     
     for i in range (len(earning['ticker'])):
         earnings_list.append([earning['ticker'][i], earning['date'][i], earning['time'][i]])
@@ -185,7 +173,7 @@ def search():
 @app.route('/crossreference', methods=['GET'])
 def get_datas():
     #initilalise driver
-    driver = webdriver.Firefox(options = options)
+    driver = webdriver.Firefox(executable_path=executable_path, firefox_binary=firefox_binary, options = options)
     wait = WebDriverWait(driver, 90)
     #open cboe website
     try:
@@ -296,25 +284,12 @@ def get_datas():
         
         time.sleep(random.randrange(5,11))
     
-    # frame = pd.DataFrame(data)
-    
     # Create an empty list 
     cboe_list = [] 
     
-    # # Iterate over each row 
-    # for index, rows in frame.iterrows(): 
-    #     # Create list for the current row 
-    #     my_list =[rows.Tickers, rows.Stock_Price, rows.Call_Last,
-    #               rows.Call_Ask, rows.Call_Int, rows.Call_Volume, 
-    #               rows.Put_Last, rows.Put_Ask, rows.Put_Int, 
-    #               rows.Put_Volume ]
-        
-    #     # append the list to the final list 
-    #     cboe_list.append(my_list)
-    
     for i in range (len(data['Tickers'])):
         cboe_list.append([data['Tickers'][i], data['Stock_Price'][i],data['Call_Last'][i],
-                          data['Call_Ask'][i], data['Call_Int'][i], data['Call_Volume'], 
+                          data['Call_Ask'][i], data['Call_Int'][i], data['Call_Volume'][i], 
                           data['Put_Last'][i], data['Put_Ask'][i], data['Put_Int'][i], 
                           data['Put_Volume'][i]])
         
