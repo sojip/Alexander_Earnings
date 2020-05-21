@@ -16,14 +16,20 @@ import time
 import random
 import json
 import os
+from celery_ import make_celery
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
-
 app = Flask(__name__)
+app.config['CELERY_BROKER_URL'] = "amqp://localhost//"
+app.config['CELERY_RESULT_BACKEND'] = "rpc://"
+
+celery = make_celery(app)
 
 #initialise webdriver options
 executable_path = os.getenv('GECKODRIVER_PATH')
 firefox_binary = os.getenv('FIREFOX_BIN')
+
+
 
 options = Options()
 options.headless = True
@@ -37,31 +43,44 @@ earning['time']= []
 
 @app.route('/')
 def acceuil():
+    
     return render_template('acceuil.html')
 
 @app.route('/search', methods=['POST'])
-def search():
-    #initialise driver
-    driver = webdriver.Firefox(executable_path=executable_path, firefox_binary=firefox_binary, options = options)
-    wait = WebDriverWait(driver, 30)
-    driver.set_page_load_timeout(60)
-    
+def process():
     start_date = request.form.get('start_date')
     end_date = request.form.get('end_date')
     
+    search.delay(start_date, end_date)
+    return jsonify("checking")
+      
+@celery.task()
+def search(start_date, end_date):
+    #initialise webdriver options
+    executable_path = "/usr/bin/geckodriver"
+    firefox_binary = "/usr/bin/firefox"
+
+    options = Options()
+    options.headless = True
+    
+    #initialise driver
+    driver = webdriver.Firefox(options = options, firefox_binary=firefox_binary, executable_path=executable_path )
+    wait = WebDriverWait(driver, 30)
+    driver.set_page_load_timeout(60)
+      
     try:
         # go to the earningwhisper website
         driver.get("https://earningswhispers.com/calendar")
     except TimeoutException:
         # send alert to ask user to wait
         driver.quit()
-        return jsonify("Time Out")
+        return json.dumps("Time Out")
     except MaxRetryError:
         driver.quit() 
-        return jsonify("Max Retry")
+        return json.dumps("Max Retry")
     except:
         driver.quit()
-        return jsonify("Error opening site")
+        return json.dumps("Error opening site")
 
 
     # select list view option
@@ -103,6 +122,7 @@ def search():
                     answer = copydata(driver, wait, earning, date)
                     if json.loads(answer) != "OK":
                         return (answer)
+                
                     
                 time.sleep(random.randrange(1,10))
 
@@ -117,9 +137,10 @@ def search():
                     if json.loads(answer) != "OK":
                         return (answer)
                 time.sleep(random.randrange(1,10))
+
         else:
             driver.quit()
-            return jsonify("Bad Value Of Dates")
+            return json.dumps("Bad Value Of Dates")
 
     else:
         start_date = start_date[2:]
@@ -144,6 +165,8 @@ def search():
                     answer = copydata(driver, wait, earning, date)
                     if json.loads(answer) != "OK":
                         return (answer)
+
+                
                 time.sleep(random.randrange(1,10))
             
             for i in range (len(second_calendar)):
@@ -155,10 +178,11 @@ def search():
                     answer = copydata(driver, wait, earning, date)
                     if json.loads(answer) != "OK":
                         return (answer)
+
                 time.sleep(random.randrange(1,10))
         else:
             driver.quit()
-            return("Bad Value Of Dates")
+            return json.dumps("Bad Value Of Dates")
     
     # Create an empty list 
     earnings_list =[] 
@@ -168,7 +192,8 @@ def search():
         
     driver.quit()
   
-    return jsonify(earnings_list)
+    return json.dumps(earnings_list)
+    
 
 @app.route('/crossreference', methods=['GET'])
 def get_datas():
@@ -180,7 +205,7 @@ def get_datas():
         driver.get("http://www.cboe.com/delayedquote/quotes-dashboard")
     except:
         driver.quit()
-        return("Error opening site")
+        return jsonify("Error opening site")
 
     data = {}
     data['Tickers'] = []
