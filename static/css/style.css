@@ -55,9 +55,9 @@ table tr {
     font-size: 15px;
 }
 
-/* #results, #cboe_results, #alerts {
+#results, #cboe_results, #alerts {
     display: none;
-} */
+}
 
 #cboe_table_title {
     margin-top: 50px;
