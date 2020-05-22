@@ -21,6 +21,8 @@ $(document).ready(function() {
     //handle form and results
     $('#period').submit(function(e) {
         e.preventDefault();
+        $("#results").fadeOut();
+        $("#cboe_results").fadeOut();
         $("#submit_button").attr('disabled', true);
         $("#submit_button").html("Waiting ...");
         var post_url = $("#period").attr("action"); //get form action url
