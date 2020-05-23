@@ -101,16 +101,19 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
                     date = link.text + " " + first_month
                     link.click()
                     answer = copydata(driver, wait, earning, date)
+                    
+                    current = int(day) - first_day + 1
+                    total = last_day - first_day + 1
 
                     if json.loads(answer) != "OK":
                         self.update_state(state='FAILURE',
-                            meta={'current': day, 'total': (last_day - first_day),
+                            meta={'current': current, 'total': total,
                                     'message': "This error occured: {} while copying datas of {}".format(answer, date)})
                         return
                     else:
                         message = "Copyied datas for {}".format(date)             
                         self.update_state(state='PROGRESS',
-                            meta={'current': day, 'total': (last_day - first_day),
+                            meta={'current': current, 'total': total,
                                     'message': message})
                 else:
                     continue
@@ -126,16 +129,20 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
                     date = link.text + " " + second_month
                     link.click()
                     answer = copydata(driver, wait, earning, date)
+                    
+                    current = int(day) - first_day + 1
+                    total = last_day - first_day + 1
+                    
                     if json.loads(answer) != "OK":
                         self.update_state(state='FAILURE',
-                            meta={'current': day, 'total': (last_day - first_day),
+                            meta={'current': current, 'total': total,
                                     'message': "This error occured: {} while copying datas of {}".format(answer, date)})
                         return
                     else:
                         message = "Copyied datas for {}".format(date)
                     
                         self.update_state(state='PROGRESS',
-                            meta={'current': day, 'total': (last_day - first_day),
+                            meta={'current': current, 'total': total,
                                     'message': message})
                     
                 time.sleep(random.randrange(1,10))
@@ -170,15 +177,19 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
                     date = link.text + " " + first_month
                     link.click()
                     answer = copydata(driver, wait, earning, date)
+                    
+                    current = int(day) - first_day + 1
+                    total = int(first_calendar[-1].text) - first_day + 1
+                    
                     if json.loads(answer) != "OK":
                         self.update_state(state='FAILURE',
-                            meta={'current': day, 'total':  int(first_calendar[-1].text) - first_day,
+                            meta={'current': current, 'total':  total,
                                     'message': "This error occured: {} while copying datas of {}".format(answer, date)})
                         return
                     else:
                         message = "Copyied datas for {}".format(date)                 
                         self.update_state(state='PROGRESS',
-                                meta={'current': day, 'total': int(first_calendar[-1].text) - first_day,
+                                meta={'current': current, 'total': total,
                                         'message': message})
 
                 
@@ -192,16 +203,19 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
                     date = link.text + " " + second_month
                     link.click()
                     answer = copydata(driver, wait, earning, date)
+                    
+                    current = int(day) - 1 + 1
+                    total = int(second_calendar[-1].text) + 1
                     if json.loads(answer) != "OK":
                         self.update_state(state='FAILURE',
-                            meta={'current': day, 'total':  int(first_calendar[-1].text),
+                            meta={'current': current, 'total':  total,
                                     'message': "This error occured: {} while copying datas of {}".format(answer, date)})
                         return
                     else:
                         message = "Copyied datas for {}".format(date)
                         
                         self.update_state(state='PROGRESS',
-                                meta={'current': day, 'total': int(second_calendar[-1].text),
+                                meta={'current': current, 'total': total,
                                         'message': message})
 
                 time.sleep(random.randrange(1,10))
@@ -220,5 +234,5 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
         
     driver.quit()
     
-    return {'current': "finished", 'total': len(earning['ticker']), 'message': 'Task completed!',
+    return {'current': 100, 'total': 100, 'message': 'Task completed!',
             'result': earnings_list}

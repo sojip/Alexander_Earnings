@@ -36,6 +36,10 @@ def process():
     start_date = request.form.get('start_date')
     end_date = request.form.get('end_date')
     
+    earning['ticker'].clear()
+    earning['date'].clear()
+    earning['time'].clear()
+    
     task = search.delay(start_date, end_date, earning, executable_path, firefox_binary)
     return jsonify({}), 202, {'Location': url_for('taskstatus',
                                                   task_id=task.id)}
@@ -80,6 +84,7 @@ def taskstatus(task_id):
             'total': 0,
             'message': str(task.info),  # this is the exception raised
         }
+    print(response)
     return jsonify(response)
 
 if __name__ == "__main__": 
