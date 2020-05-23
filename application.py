@@ -34,6 +34,7 @@ def process():
     from task_search import search
     
     start_date = request.form.get('start_date')
+    print(start_date)
     end_date = request.form.get('end_date')
     
     earning['ticker'].clear()

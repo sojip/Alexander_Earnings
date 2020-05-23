@@ -27,6 +27,17 @@ nav {
     margin-bottom: 0;
 }
 
+#noty {
+    position: fixed;
+    top: 15%;
+    right: 0;
+    left: 0;
+    margin-right: auto;
+    margin-left: auto;
+    width: 30%;
+    
+}
+
 #user_values {
     margin-top: 150px;
     margin-bottom: 50px;
@@ -55,7 +66,7 @@ table tr {
     font-size: 15px;
 }
 
-#results, #cboe_results, #alerts {
+#results, #cboe_results {
     display: none;
 }
 
@@ -64,6 +75,11 @@ table tr {
 }
 
 
-.progress {
-    padding: 20px;
+.bar {
+    background-color: #5cb85c;
+}
+
+
+#progress_container {
+    text-align: center;
 }

@@ -1,62 +1,22 @@
-$(document).ready(function() { 
+$(document).ready(function() {
 
-    
-    //celery 
+    //Always delete previous alert when showing new one
+    $.noty.defaults.killer = true;
+  
+    //handle period form
     $("#period").submit(function(e){
         e.preventDefault();
-        start_long_task();
+        $("#results").fadeOut();
+        $("#cboe_results").fadeOut();
+        $("#noty").noty({
+            text: 'Submitted!',
+            layout: 'topCenter',
+            timeout: 5000,
+            closeWith: ['click', 'hover'],
+            type: 'success'
+            });
+        start_search();
     })
-
-//     //handle form and results
-//     $('#period').submit(function(e) {
-//         e.preventDefault();
-//         $("#submit_button").attr('disabled', true);
-//         $("#submit_button").html("Waiting ...");
-//         var post_url = $("#period").attr("action"); //get form action url
-//         var request_method = $("#period").attr("method"); //get form GET/POST method
-//         var form_data = $("#period").serialize(); //Encode form elements for submission
-
-//         // add task status elements 
-//         div = $('<div class="progress"><div></div><div>0%</div><div>...</div><div>&nbsp;</div></div><hr>');
-//         $('#progress').append(div);
-
-//         // create a progress bar
-//         var nanobar = new Nanobar({
-//             bg: '#44f',
-//             target: div[0].childNodes[0]
-//         });
-
-//         $.ajax({
-//             url : post_url,
-//             type: request_method,
-//             data : form_data,
-//             datatype: 'json',
-//             success: function(response) {
-//                 // if (typeof(response) == "string") {
-//                 //     $("#alert_danger").html("<strong>Oh snap!</strong>" + " " + response + "!" + " Wait a minute and try submitting again");
-//                 //     $("#alerts").fadeIn();
-//                 //     $("#submit_button").html("Search")
-//                 //     $("#submit_button").attr('disabled', false)
-//                 //     $("#period")[0].reset()
-
-//                 // }
-//                 // else {
-//                 //     table.rows.add(response).draw();
-//                 //     $("tr").addClass("table-dark");
-//                 //     $("#results").fadeIn();
-//                 //     $("#submit_button").html("Search")
-//                 //     $("#submit_button").attr('disabled', false)
-//                 //     $("#period")[0].reset()
-//                 // }
-
-//             },
-//             error: function() {
-//                 alert('Unexpected error');
-//             }
-//         })
-        
-//     })
-    
 });
 
 //get cboe datas
@@ -105,22 +65,22 @@ function get_cboe_datas() {
 }
 
 
-//celery
-function start_long_task() {
+
+function start_search() {
     // add task status elements 
-    div = $('<div class="progress"><div></div><div>0%</div><div>...</div><div>&nbsp;</div></div><hr>');
+    div = $('<div id="progress_container"><div></div><div>0%</div><hr>');
     $('#progress').append(div);
 
     // create a progress bar
     var nanobar = new Nanobar({
-        bg: '#44f',
+        bg: '#5cb85c',
         target: div[0].childNodes[0]
     });
 
     var post_url = $("#period").attr("action"); //get form action url
     var request_method = $("#period").attr("method"); //get form GET/POST method
     var form_data = $("#period").serialize(); //Encode form elements for submission
-
+    $("#period")[0].reset()
     // send ajax POST request to start background job
     $.ajax({
         type: request_method,
@@ -131,7 +91,13 @@ function start_long_task() {
             update_progress(status_url, nanobar, div[0]);
         },
         error: function() {
-            alert('Unexpected error');
+            $("#noty").noty({
+                text: 'Unexpected Error!',
+                layout: 'topCenter',
+                timeout: 5000,
+                closeWith: ['click', 'hover'],
+                type: 'error'
+                });
         }
     });
 }
@@ -150,7 +116,7 @@ function update_progress(status_url, nanobar, status_div) {
         }
         nanobar.go(percent);
         $(status_div.childNodes[1]).text(percent + '%');
-        $(status_div.childNodes[2]).text(data['status']);
+        $(status_div.childNodes[2]).text(data['message']);
         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
             if ('result' in data) {
                 // show result in earnings table
@@ -189,7 +155,13 @@ function update_progress(status_url, nanobar, status_div) {
             }
             else {
                 // something unexpected happened
-                $(status_div.childNodes[3]).text('Result: ' + data['state']);
+                $("#noty").noty({
+                    text: data['state'],
+                    layout: 'topCenter',
+                    timeout: 5000,
+                    closeWith: ['click', 'hover'],
+                    type: 'error'
+                    });
             }
         }
         else {
