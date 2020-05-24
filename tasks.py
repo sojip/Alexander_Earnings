@@ -330,10 +330,10 @@ def crossreference(self, tickers_list, executable_path, firefox_binary):
         puts = driver.find_elements_by_xpath("//table[@id='tblPuts']//tbody//tr")
         
         strikes = driver.find_elements_by_xpath("//table[@id='tblStrike']//tbody//td")
-        for i in range (len(strikes)):
-            if float(strikes[i].text.split()[1]) <= float(stock_price) and float(strikes[i+1].text.split()[1]) >= float(stock_price):
-                calls_row = calls[i].text
-                puts_row = puts[i+1].text
+        for j in range (len(strikes)):
+            if float(strikes[j].text.split()[1]) <= float(stock_price) and float(strikes[j+1].text.split()[1]) >= float(stock_price):
+                calls_row = calls[j].text
+                puts_row = puts[j+1].text
                 
                 call_last = calls_row.split()[0]
                 call_ask = calls_row.split()[3]
