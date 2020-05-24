@@ -7,7 +7,8 @@ from celery_ import make_celery
 
 
 app = Flask(__name__)
-app.config['CELERY_BROKER_URL'] = "amqp://localhost//"
+
+app.config['CELERY_BROKER_URL'] = os.getenv('CLOUDAMQP_URL')
 app.config['CELERY_RESULT_BACKEND'] = "rpc://"
 
 celery_app = make_celery(app)
@@ -31,10 +32,9 @@ def acceuil():
 
 @app.route('/search', methods=['POST'])
 def process():
-    from task_search import search
+    from tasks import search
     
     start_date = request.form.get('start_date')
-    print(start_date)
     end_date = request.form.get('end_date')
     
     earning['ticker'].clear()
@@ -46,17 +46,20 @@ def process():
                                                   task_id=task.id)}
 
 
-@app.route('/crossreference', methods=['GET'])
+@app.route('/crossreference', methods=['POST'])
 def get_datas():
-    from task_crossreference import crossreference
+    datas = request.form.get('tickers')
+    tickers_list = datas.split("<br>")
+ 
+    from tasks import crossreference
     
-    task = crossreference.delay(earning, executable_path, firefox_binary)  
+    task = crossreference.delay(tickers_list, executable_path, firefox_binary)  
     return jsonify({}), 202, {'Location': url_for('taskstatus',
                                                   task_id=task.id)}
     
 @app.route('/status/<task_id>')
 def taskstatus(task_id):
-    from task_search import search
+    from tasks import search
     task = search.AsyncResult(task_id)
     if task.state == 'PENDING':
         # job did not start yet
@@ -68,14 +71,23 @@ def taskstatus(task_id):
         }
         
     elif task.state != 'FAILURE':
-        response = {
-            'state': task.state,
-            'current': task.info['current'],
-            'total': task.info['total'],
-            'message': task.info['message'],
-        }
-        if 'result' in task.info:
-            response['result'] = task.info['result']
+        # if it returns None
+        if task.info is None:
+            response = {
+                'state': 'FAILURE',
+                'current': 0,
+                'total': 0,
+                'message' : "An error occured"
+            }
+        else:
+            response = {
+                'state': task.state,
+                'current': task.info['current'],
+                'total': task.info['total'],
+                'message': task.info['message'],
+            }
+            if 'result' in task.info:
+                response['result'] = task.info['result']
             
     else:
         # something went wrong in the background job
