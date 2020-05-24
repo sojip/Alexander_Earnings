@@ -223,7 +223,8 @@ function update_reference_progress(status_url, status_div) {
                     timeout: 5000,
                     closeWith: ['click', 'hover'],
                     type: 'error'
-                    });           
+                    });
+                $("#progress_bar_2").fadeOut();        
             }
         }
         else {

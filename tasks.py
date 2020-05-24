@@ -277,11 +277,11 @@ def crossreference(self, tickers_list, executable_path, firefox_binary):
     data['Put_Volume'] = []
 
     #lookup each ticker
-    for ticker in tickers_list:
+    for i in range (len(tickers_list)):
         try:
             query =  wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='symbol']")))                      
             query.clear()
-            query.send_keys(ticker)
+            query.send_keys(tickers_list[i])
             button = driver.find_element_by_xpath("//div[@class='search-component']//button[@type='submit']")
             overlay = driver.find_element_by_class_name("cookie-msg-cntr")
             driver.execute_script("arguments[0].style.visibility='hidden'", overlay)
@@ -301,7 +301,7 @@ def crossreference(self, tickers_list, executable_path, firefox_binary):
             options_chains.click()
         except ElementNotInteractableException:
             
-            data['Tickers'].append(ticker)
+            data['Tickers'].append(tickers_list[i])
             data['Stock_Price'].append("No Value")
             data['Call_Last'].append("No Value")
             data['Call_Ask'].append("No Value")
@@ -317,8 +317,8 @@ def crossreference(self, tickers_list, executable_path, firefox_binary):
         except:
             #update state
             self.update_state(state='FAILURE',
-                            meta={'current': tickers_list.index(ticker), 'total': len(tickers_list),
-                                    'message': "Error selecting option chain for {}".format(ticker)})
+                            meta={'current': i, 'total': len(tickers_list),
+                                    'message': "Error selecting option chain for {}".format(tickers_list[i])})
             driver.quit()
             return
         
@@ -344,7 +344,7 @@ def crossreference(self, tickers_list, executable_path, firefox_binary):
                 put_vol = puts_row.split()[4]
                 put_int = puts_row.split()[8]
                 
-                data['Tickers'].append(ticker)
+                data['Tickers'].append(tickers_list[i])
                 data['Stock_Price'].append(stock_price)
                 data['Call_Last'].append(call_last)
                 data['Call_Ask'].append(call_ask)
@@ -357,8 +357,8 @@ def crossreference(self, tickers_list, executable_path, firefox_binary):
                 break
             else:
                 continue
-        if ticker not in data['Tickers']:
-            data['Tickers'].append(ticker)
+        if tickers_list[i] not in data['Tickers']:
+            data['Tickers'].append(tickers_list[i])
             data['Stock_Price'].append("No Value")
             data['Call_Last'].append("No Value")
             data['Call_Ask'].append("No Value")
@@ -373,8 +373,8 @@ def crossreference(self, tickers_list, executable_path, firefox_binary):
         driver.back()
         
         self.update_state(state='PROGRESS',
-                            meta={'current': tickers_list.index(ticker), 'total': len(tickers_list),
-                                    'message': "copyied datas for {}".format(ticker)})
+                            meta={'current': i, 'total': len(tickers_list),
+                                    'message': "copyied datas for {}".format(tickers_list[i])})
         
         time.sleep(random.randrange(5,11))
     
