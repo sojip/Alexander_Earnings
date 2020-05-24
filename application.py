@@ -13,6 +13,7 @@ app.config['result_backend'] = "rpc"
 app.config['broker_pool_limit'] = 1
 app.config['broker_heartbeat'] = None
 app.config['worker_prefetch_multiplier'] = 1
+app.config['worker_concurrency'] = 50
 
 
 
