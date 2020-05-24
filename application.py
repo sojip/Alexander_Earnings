@@ -9,13 +9,19 @@ from celery_ import make_celery
 app = Flask(__name__)
 
 app.config['CELERY_BROKER_URL'] = os.getenv('CLOUDAMQP_URL')
-app.config['CELERY_RESULT_BACKEND'] = "rpc://"
+app.config['result_backend'] = "rpc"
+app.config['broker_pool_limit'] = 1
+app.config['broker_heartbeat'] = None
+app.config['worker_prefetch_multiplier'] = 1
+
+
 
 celery_app = make_celery(app)
 
 #initialise webdriver options
 executable_path = os.getenv('GECKODRIVER_PATH')
 firefox_binary = os.getenv('FIREFOX_BIN')
+
 
 
 #global variables
