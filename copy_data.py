@@ -3,6 +3,8 @@ from selenium.webdriver.support import expected_conditions as EC #to define cond
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 import json
+
+
 #function to copy data after selecting a date
 def copydata(driver, wait, earning, date):
     try:
