@@ -37,7 +37,7 @@ def copydata(driver, wait, earning, date):
                 if tickers_[i].text != '':
                     earning['ticker'].append(tickers_[i].text)
                     earning['date'].append(date)
-                    earning['time'].append(time[i])
+                    earning['time'].append(time[i].text)
         except:
             driver.quit()
             return json.dumps("Error copying")
@@ -50,6 +50,6 @@ def copydata(driver, wait, earning, date):
         if tickers_[i].text != '':
             earning['ticker'].append(tickers_[i].text)
             earning['date'].append(date)
-            earning['time'].append(time[i])
+            earning['time'].append(time[i].text)
             
     return json.dumps("OK")
