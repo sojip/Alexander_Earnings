@@ -117,6 +117,7 @@ function update_search_progress(status_url, nanobar, status_div) {
                 table.rows.add(data['result']).draw();
                 $("tr").addClass("table-dark");
                 $("#results").fadeIn();
+                return;
             }
             else {
                 // something unexpected happened
