@@ -81,7 +81,7 @@ function update_search_progress(status_url, nanobar, status_div) {
         nanobar.go(percent);
         $(status_div.childNodes[1]).text(percent + '%');
         $(status_div.childNodes[2]).text(data['message']);
-        if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
+        if (data['state'] == 'SUCCESS') {
             if ('result' in data) {
                 // show result in earnings table
 
