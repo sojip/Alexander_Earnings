@@ -29,38 +29,35 @@ def copydata(driver, wait, earning, date):
         del element
     
     except NoSuchElementException:
-        try:
-            #copy data
-            tickers = driver.find_elements_by_class_name('ticker')
-            time_title = driver.find_element_by_id("time")
-            actual_title = driver.find_element_by_id("actual")
-            if time_title.is_displayed():
-                for i in range (len(tickers)):       
-                    time = driver.find_elements_by_class_name('time')
-                    tickers_ = driver.find_elements_by_class_name('ticker')
+        #copy data
+        tickers = driver.find_elements_by_class_name('ticker')
+        time_title = driver.find_element_by_id("time")
+        actual_title = driver.find_element_by_id("actual")
+        if time_title.is_displayed():
+            for i in range (len(tickers)):       
+                time = driver.find_elements_by_class_name('time')
+                tickers_ = driver.find_elements_by_class_name('ticker')
+                if tickers_[i].text != '':
+                    earning['ticker'].append(tickers_[i].text)
+                    earning['date'].append(date)
+                    earning['time'].append(time[i].text)
+        elif actual_title.is_displayed():
+            for i in range (len(tickers)):
+                time = driver.find_elements_by_class_name('time')
+                actual = driver.find_elements_by_css_selector("div[class^='actual']")
+                tickers_ = driver.find_elements_by_class_name('ticker')
+                if i < len(actual):
                     if tickers_[i].text != '':
                         earning['ticker'].append(tickers_[i].text)
                         earning['date'].append(date)
-                        earning['time'].append(time[i].text)
-            elif actual_title.is_displayed():
-                for i in range (len(tickers)):
-                    time = driver.find_elements_by_class_name('time')
-                    actual = driver.find_elements_by_css_selector("div[class^='actual']")
-                    tickers_ = driver.find_elements_by_class_name('ticker')
-                    if i < len(actual):
-                        if tickers_[i].text != '':
-                            earning['ticker'].append(tickers_[i].text)
-                            earning['date'].append(date)
-                            earning['time'].append(actual[i].text)
-                    elif i >= len(actual):
-                        if tickers_[i].text != '':
-                            earning['ticker'].append(tickers_[i].text)
-                            earning['date'].append(date)
-                            earning['time'].append(time[i - len(actual)].text)
-        except:
-            driver.quit()
-            return json.dumps("Error copying")
-        
+                        earning['time'].append(actual[i].text)
+                elif i >= len(actual):
+                    if tickers_[i].text != '':
+                        earning['ticker'].append(tickers_[i].text)
+                        earning['date'].append(date)
+                        earning['time'].append(time[i - len(actual)].text)
+        return json.dumps("OK")
+    
     #copy data
     tickers = driver.find_elements_by_class_name('ticker')
     time_title = driver.find_element_by_id("time")
