@@ -17,6 +17,7 @@ import random
 import json
 from application import celery_app
 
+
 @celery_app.task(bind=True, name="tasks.search")
 def search(self, start_date, end_date, earning, executable_path, firefox_binary):
 
@@ -26,7 +27,7 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
     #initialise driver
     driver = webdriver.Firefox(options = options, firefox_binary=firefox_binary, executable_path=executable_path )
     wait = WebDriverWait(driver, 90)
-    driver.set_page_load_timeout(60)
+    driver.set_page_load_timeout(90)
     
     site = "https://earningwhispers.com" 
     
@@ -73,14 +74,13 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
 
     # calendars
     first_month = " ".join(wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='Cal1']//h1"))).text.split())
-    #first_month = " ".join(driver.find_element_by_xpath("//div[@id='Cal1']//h1").text.split())
-    first_calendar = wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@id='Cal1']//a[contains(@href,'calendar')]")))
-    #first_calendar = driver.find_elements_by_xpath("//div[@id='Cal1']//a[contains(@href,'calendar')]")
-
+    try:
+        first_calendar = wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@id='Cal1']//a[contains(@href,'calendar')]")))
+    except TimeoutException:
+        pass
+        
     second_month = " ".join(wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='Cal2']//h1"))).text.split())
-    #second_month = " ".join(driver.find_element_by_xpath("//div[@id='Cal2']//h1").text.split())
     second_calendar = wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@id='Cal2']//a[contains(@href,'calendar')]")))
-    #second_calendar = driver.find_elements_by_xpath("//div[@id='Cal2']//a[contains(@href,'calendar')]")
 
     if start_date.split('-')[1] == end_date.split('-')[1]:
         # transform dates string into date objects
@@ -93,7 +93,6 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
         if date == first_month:
             for i in range (len(first_calendar)):
                 first_calendar = wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@id='Cal1']//a[contains(@href,'calendar')]")))
-                #first_calendar = driver.find_elements_by_xpath("//div[@id='Cal1']//a[contains(@href,'calendar')]")
                 if int(first_calendar[i].text) >= first_day and int(first_calendar[i].text) <= last_day:
                     
                     link = driver.find_element_by_xpath("//div[@id='Cal1']//a[contains(text(),{})]".format(first_calendar[i].text))
