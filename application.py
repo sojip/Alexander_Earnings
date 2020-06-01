@@ -8,8 +8,8 @@ from celery_ import make_celery
 
 app = Flask(__name__)
 
-app.config['CELERY_BROKER_URL'] = os.getenv('CLOUDAMQP_URL')
-app.config['result_backend'] = "rpc"
+app.config['CELERY_BROKER_URL'] = 'pyamqp://rabbitmq:rabbitmq@rabbit//'
+app.config['result_backend'] = "rpc://"
 app.config['broker_pool_limit'] = 1
 app.config['broker_heartbeat'] = None
 app.config['worker_prefetch_multiplier'] = 1
@@ -18,11 +18,6 @@ app.config['worker_concurrency'] = 1
 
 
 celery_app = make_celery(app)
-
-#initialise webdriver options
-executable_path = os.getenv('GECKODRIVER_PATH')
-firefox_binary = os.getenv('FIREFOX_BIN')
-
 
 
 #global variables
@@ -47,8 +42,7 @@ def process():
     earning['ticker'].clear()
     earning['date'].clear()
     earning['time'].clear()
-    
-    task = search.delay(start_date, end_date, earning, executable_path, firefox_binary)
+    task = search.delay(start_date, end_date, earning)
     return jsonify({}), 202, {'Location': url_for('taskstatus',
                                                   task_id=task.id)}
 
@@ -60,7 +54,7 @@ def get_datas():
  
     from tasks import crossreference
     
-    task = crossreference.delay(tickers_list, executable_path, firefox_binary)  
+    task = crossreference.delay(tickers_list)  
     return jsonify({}), 202, {'Location': url_for('taskstatus',
                                                   task_id=task.id)}
     
@@ -108,4 +102,4 @@ def taskstatus(task_id):
     return jsonify(response)
 
 if __name__ == "__main__": 
-        app.run() 
+        app.run(host='0.0.0.0') 

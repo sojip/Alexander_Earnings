@@ -1,0 +1,49 @@
+version: "3"
+services:
+  hub:
+    image: selenium/hub:3.141.59-20200525
+    ports:
+      - "4444:4444"
+  firefox:
+    image: selenium/node-firefox:3.141.59-20200525
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - hub
+    environment:
+      - HUB_HOST=hub
+      - HUB_PORT=4444
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rabbit
+      - hub
+    volumes:
+      - .:/app
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:management
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmq
+      - RABBITMQ_DEFAULT_PASS=rabbitmq
+    ports:
+      - "5673:5672"
+      - "15672:15672"
+
+  worker:
+    build:
+      context: .
+    hostname: worker
+    entrypoint: celery
+    command: -A tasks worker --loglevel=info
+    links:
+      - rabbit
+    depends_on:
+      - rabbit
+    volumes:
+      - .:/app

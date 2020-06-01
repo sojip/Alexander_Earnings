@@ -7,7 +7,6 @@ from selenium.webdriver.support import expected_conditions as EC #to define cond
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import ElementNotInteractableException
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.common.exceptions import TimeoutException
 from urllib3.exceptions import MaxRetryError
 from selenium import webdriver #for browser sessions
@@ -16,16 +15,17 @@ import time
 import random
 import json
 from application import celery_app
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 @celery_app.task(bind=True, name="tasks.search")
-def search(self, start_date, end_date, earning, executable_path, firefox_binary):
+def search(self, start_date, end_date, earning):
 
     options = Options()
     options.headless = True
     
     #initialise driver
-    driver = webdriver.Firefox(options = options, firefox_binary=firefox_binary, executable_path=executable_path )
+    driver = webdriver.Remote(command_executor='http://172.23.0.3:4444/wd/hub', desired_capabilities=DesiredCapabilities.FIREFOX, options = options)
     wait = WebDriverWait(driver, 90)
     driver.set_page_load_timeout(90)
     
@@ -241,12 +241,12 @@ def search(self, start_date, end_date, earning, executable_path, firefox_binary)
 
 
 @celery_app.task(bind=True, name="tasks.crossreference")
-def crossreference(self, tickers_list, executable_path, firefox_binary):
+def crossreference(self, tickers_list):
     options = Options()
     options.headless = True
     
     #initilalise driver
-    driver = webdriver.Firefox(executable_path=executable_path, firefox_binary=firefox_binary, options = options)
+    driver = webdriver.Remote(command_executor='http://172.23.0.3:4444/wd/hub', desired_capabilities=DesiredCapabilities.FIREFOX, options = options)
     wait = WebDriverWait(driver, 60)
     driver.set_page_load_timeout(60)
     
