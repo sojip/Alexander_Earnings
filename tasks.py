@@ -25,7 +25,7 @@ def search(self, start_date, end_date, earning):
     options.headless = True
     
     #initialise driver
-    driver = webdriver.Remote(command_executor='http://172.23.0.3:4444/wd/hub', desired_capabilities=DesiredCapabilities.FIREFOX, options = options)
+    driver = webdriver.Remote(command_executor='http://172.18.0.2:4444/wd/hub', desired_capabilities=DesiredCapabilities.FIREFOX, options = options)
     wait = WebDriverWait(driver, 90)
     driver.set_page_load_timeout(90)
     
@@ -246,7 +246,7 @@ def crossreference(self, tickers_list):
     options.headless = True
     
     #initilalise driver
-    driver = webdriver.Remote(command_executor='http://172.23.0.3:4444/wd/hub', desired_capabilities=DesiredCapabilities.FIREFOX, options = options)
+    driver = webdriver.Remote(command_executor='http://172.18.0.2:4444/wd/hub', desired_capabilities=DesiredCapabilities.FIREFOX, options = options)
     wait = WebDriverWait(driver, 60)
     driver.set_page_load_timeout(60)
     
@@ -274,6 +274,8 @@ def crossreference(self, tickers_list):
     data['Put_Ask'] = []
     data['Put_Int'] = []
     data['Put_Volume'] = []
+    
+    print(tickers_list)
 
     #lookup each ticker
     for i in range (len(tickers_list)):
@@ -330,31 +332,34 @@ def crossreference(self, tickers_list):
         
         strikes = driver.find_elements_by_xpath("//table[@id='tblStrike']//tbody//td")
         for j in range (len(strikes)):
-            if float(strikes[j].text.split()[1]) <= float(stock_price) and float(strikes[j+1].text.split()[1]) >= float(stock_price):
-                calls_row = calls[j].text
-                puts_row = puts[j+1].text
-                
-                call_last = calls_row.split()[0]
-                call_ask = calls_row.split()[3]
-                call_vol = calls_row.split()[4]
-                call_int = calls_row.split()[8]
-                put_last = puts_row.split()[0]
-                put_ask = puts_row.split()[3]
-                put_vol = puts_row.split()[4]
-                put_int = puts_row.split()[8]
-                
-                data['Tickers'].append(tickers_list[i])
-                data['Stock_Price'].append(stock_price)
-                data['Call_Last'].append(call_last)
-                data['Call_Ask'].append(call_ask)
-                data['Call_Int'].append(call_int)
-                data['Call_Volume'].append(call_vol)
-                data['Put_Last'].append(put_last)
-                data['Put_Ask'].append(put_ask)
-                data['Put_Int'].append(put_int)
-                data['Put_Volume'].append(put_vol)
-                break
-            else:
+            try:
+                if float(strikes[j].text.split()[1]) <= float(stock_price) and float(strikes[j+1].text.split()[1]) >= float(stock_price):
+                    calls_row = calls[j].text
+                    puts_row = puts[j+1].text
+                    
+                    call_last = calls_row.split()[0]
+                    call_ask = calls_row.split()[3]
+                    call_vol = calls_row.split()[4]
+                    call_int = calls_row.split()[8]
+                    put_last = puts_row.split()[0]
+                    put_ask = puts_row.split()[3]
+                    put_vol = puts_row.split()[4]
+                    put_int = puts_row.split()[8]
+                    
+                    data['Tickers'].append(tickers_list[i])
+                    data['Stock_Price'].append(stock_price)
+                    data['Call_Last'].append(call_last)
+                    data['Call_Ask'].append(call_ask)
+                    data['Call_Int'].append(call_int)
+                    data['Call_Volume'].append(call_vol)
+                    data['Put_Last'].append(put_last)
+                    data['Put_Ask'].append(put_ask)
+                    data['Put_Int'].append(put_int)
+                    data['Put_Volume'].append(put_vol)
+                    break
+                else:
+                    continue
+            except:
                 continue
         if tickers_list[i] not in data['Tickers']:
             data['Tickers'].append(tickers_list[i])

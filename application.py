@@ -55,7 +55,7 @@ def get_datas():
     from tasks import crossreference
     
     task = crossreference.delay(tickers_list)  
-    return jsonify({}), 202, {'Location': url_for('taskstatus',
+    return jsonify({}), 202, {'Location': url_for('referencestatus',
                                                   task_id=task.id)}
     
 @app.route('/status/<task_id>')
@@ -98,7 +98,48 @@ def taskstatus(task_id):
             'total': 0,
             'message': str(task.info),  # this is the exception raised
         }
-    print(response)
+    return jsonify(response)
+
+@app.route('/status/<task_id>')
+def referencestatus(task_id):
+    from tasks import crossreference
+    task = crossreference.AsyncResult(task_id)
+    if task.state == 'PENDING':
+        # job did not start yet
+        response = {
+            'state': task.state,
+            'current': 0,
+            'total': 0,
+            'message': 'Pending...'
+        }
+        
+    elif task.state != 'FAILURE':
+        # if it returns None
+        if task.info is None:
+            response = {
+                'state': 'FAILURE',
+                'current': 0,
+                'total': 0,
+                'message' : "An error occured"
+            }
+        else:
+            response = {
+                'state': task.state,
+                'current': task.info['current'],
+                'total': task.info['total'],
+                'message': task.info['message'],
+            }
+            if 'result' in task.info:
+                response['result'] = task.info['result']
+            
+    else:
+        # something went wrong in the background job
+        response = {
+            'state': task.state,
+            'current': 0,
+            'total': 0,
+            'message': str(task.info),  # this is the exception raised
+        }
     return jsonify(response)
 
 if __name__ == "__main__": 
